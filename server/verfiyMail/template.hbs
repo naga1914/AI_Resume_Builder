@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Verification</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px;">
+
+  <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+
+    <h2 style="color: #4CAF50;">Welcome to Our Service!</h2>
+
+    <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
+
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="http://localhost:3000/verify/{{token}}"
+         style="display: inline-block; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+        Verify Email
+      </a>
+    </div>
+
+    <p>If you did not sign up for this account, please ignore this email.</p>
+
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;" />
+
+    <p style="font-size: 14px; color: #777;">
+      Best regards,<br />
+      <strong>The Team</strong>
+    </p>
+
+  </div>
+
+</body>
+</html>
