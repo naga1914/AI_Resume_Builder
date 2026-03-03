@@ -9,7 +9,6 @@ import resumeRoutes from "./routes/resumeRoutes.js";
 import userRoutes from "./routes/userRoute.js";
 import aiRouter from "./routes/aiRoutes.js";
 
-
 const app = express();
 
 /* ===============================
@@ -27,9 +26,24 @@ connectDB().catch(err => {
 /* ===============================
    Middlewares
 ================================= */
+
+// Allow requests from localhost and your deployed frontend
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-resume-builder-zhpc.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function(origin, callback){
+      // allow requests with no origin (like Postman)
+      if(!origin) return callback(null, true);
+      if(allowedOrigins.includes(origin)){
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -41,7 +55,6 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
 });
-
 
 /* ===============================
    Routes
@@ -80,7 +93,7 @@ app.get('/__routes', (req, res) => {
 ================================= */
 const PORT = process.env.PORT || 5000;
 
-app.get('/',(req,res)=> res.send("server is live..."))
+app.get('/', (req, res) => res.send("Server is live..."));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
