@@ -1,10 +1,10 @@
+// aiController.js
 import Resume from "../models/resume.js";
 import ai from "../DB/ai.js";
 
 /* =========================================================
    PROFESSIONAL SUMMARY
 ========================================================= */
-
 export const enhanceProfessionalSummary = async (req, res) => {
   try {
     const { userContent } = req.body;
@@ -12,6 +12,8 @@ export const enhanceProfessionalSummary = async (req, res) => {
     if (!userContent) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    console.log("AI Input (Professional Summary):", userContent);
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -21,18 +23,17 @@ export const enhanceProfessionalSummary = async (req, res) => {
           content:
             "You are an expert resume writer. Enhance the professional summary in 1-2 compelling sentences. Highlight key skills, experience, and career objectives. Make it ATS-friendly. Return only plain text.",
         },
-        {
-          role: "user",
-          content: userContent,
-        },
+        { role: "user", content: userContent },
       ],
     });
+
+    console.log("AI Response:", response);
 
     const enhancedContent = response.choices[0].message.content;
 
     return res.status(200).json({ enhancedContent });
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error("AI ERROR (Professional Summary):", error.response?.data || error.message);
     return res.status(500).json({
       message: "AI generation failed",
       error: error.message,
@@ -43,7 +44,6 @@ export const enhanceProfessionalSummary = async (req, res) => {
 /* =========================================================
    JOB DESCRIPTION
 ========================================================= */
-
 export const enhanceJobDescription = async (req, res) => {
   try {
     const { userContent } = req.body;
@@ -51,6 +51,8 @@ export const enhanceJobDescription = async (req, res) => {
     if (!userContent) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    console.log("AI Input (Job Description):", userContent);
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -60,18 +62,17 @@ export const enhanceJobDescription = async (req, res) => {
           content:
             "You are an expert resume writer. Enhance the job description using action verbs and measurable achievements. Keep it 1-2 strong sentences. Make it ATS-friendly. Return only plain text.",
         },
-        {
-          role: "user",
-          content: userContent,
-        },
+        { role: "user", content: userContent },
       ],
     });
+
+    console.log("AI Response:", response);
 
     const enhancedContent = response.choices[0].message.content;
 
     return res.status(200).json({ enhancedContent });
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error("AI ERROR (Job Description):", error.response?.data || error.message);
     return res.status(500).json({
       message: "AI generation failed",
       error: error.message,
@@ -80,18 +81,17 @@ export const enhanceJobDescription = async (req, res) => {
 };
 
 /* =========================================================
-   PROJECT DESCRIPTION  ✅ (NEW CLEAN VERSION)
+   PROJECT DESCRIPTION
 ========================================================= */
-
 export const enhanceProjectDescription = async (req, res) => {
   try {
     const { userContent } = req.body;
 
     if (!userContent) {
-      return res
-        .status(400)
-        .json({ message: "Project description content is required" });
+      return res.status(400).json({ message: "Project description content is required" });
     }
+
+    console.log("AI Input (Project Description):", userContent);
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -101,19 +101,18 @@ export const enhanceProjectDescription = async (req, res) => {
           content:
             "You are an expert resume writer. Enhance the project description to be achievement-driven, impact-focused, and ATS-optimized. Use strong action verbs and measurable results where possible. Keep it concise. Return only plain text.",
         },
-        {
-          role: "user",
-          content: userContent,
-        },
+        { role: "user", content: userContent },
       ],
       temperature: 0.7,
     });
+
+    console.log("AI Response:", response);
 
     const enhancedContent = response.choices[0].message.content;
 
     return res.status(200).json({ enhancedContent });
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error("AI ERROR (Project Description):", error.response?.data || error.message);
     return res.status(500).json({
       message: "AI generation failed",
       error: error.message,
@@ -124,7 +123,6 @@ export const enhanceProjectDescription = async (req, res) => {
 /* =========================================================
    RESUME UPLOAD & EXTRACTION
 ========================================================= */
-
 export const uploadResume = async (req, res) => {
   try {
     const { resumeText, title } = req.body;
@@ -133,6 +131,8 @@ export const uploadResume = async (req, res) => {
     if (!resumeText) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    console.log("AI Input (Resume Upload):", resumeText);
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -185,10 +185,20 @@ Return ONLY valid JSON in this exact format:
 }`,
         },
       ],
-      response_format: { type: "json_object" },
     });
 
-    const parsedData = JSON.parse(response.choices[0].message.content);
+    console.log("AI Response (Resume):", response);
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(response.choices[0].message.content);
+    } catch (err) {
+      console.error("JSON parse error:", response.choices[0].message.content);
+      return res.status(500).json({
+        message: "Failed to parse AI output",
+        error: err.message,
+      });
+    }
 
     const newResume = await Resume.create({
       user: userId,
@@ -196,9 +206,9 @@ Return ONLY valid JSON in this exact format:
       ...parsedData,
     });
 
-    return res.json({ resumeId: newResume._id });
+    return res.status(200).json({ resumeId: newResume._id });
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error("AI ERROR (Resume Upload):", error.response?.data || error.message);
     return res.status(500).json({
       message: "Resume extraction failed",
       error: error.message,
@@ -206,4 +216,9 @@ Return ONLY valid JSON in this exact format:
   }
 };
 
-export default {enhanceJobDescription, enhanceProfessionalSummary, uploadResume,enhanceProjectDescription};
+export default {
+  enhanceProfessionalSummary,
+  enhanceJobDescription,
+  enhanceProjectDescription,
+  uploadResume,
+};
