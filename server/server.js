@@ -28,10 +28,15 @@ connectDB().catch(err => {
 ================================= */
 
 // Allow requests from localhost and your deployed frontend
+// Fix the listen call (add '0.0.0.0')
+
+
+// Also fix CORS for production - add your exact Vercel URL
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://ai-resume-builder-zhpc.vercel.app"
+  "https://ai-resume-builder-zhpc.vercel.app"  // Verify this exact URL
 ];
+
 
 app.use(
   cors({
@@ -104,6 +109,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
